@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'NavigationPages.dart';
 import 'screens/supplier/views/auth/forgot_otp_screen.dart';
 import 'screens/supplier/views/auth/forgot_password.dart';
 import 'screens/supplier/views/auth/login_screen.dart';
@@ -22,7 +23,7 @@ class MainApp extends StatelessWidget {
       initialRoute: '/loginScreen',
       // initialRoute: '/profileInfoScreen',
       routes: {
-        '/homeScreen': (context) => HomeScreen(),
+        '/homeScreen': (context) => NavigationPage(),
         '/profileInfoScreen': (context) => PersonalInfoScreen(),
         '/loginScreen': (context) => LoginScreen(),
         '/registerScreen': (context) => RegisterScreen(),
