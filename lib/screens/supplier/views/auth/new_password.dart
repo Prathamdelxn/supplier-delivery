@@ -1,42 +1,22 @@
 import 'package:flutter/material.dart';
 
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+class NewPasswordScreen extends StatefulWidget {
+  const NewPasswordScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<NewPasswordScreen> createState() => NewPasswordScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
-  final TextEditingController emailController = TextEditingController();
+class NewPasswordScreenState extends State<NewPasswordScreen> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
-  bool isNumericKeyboard = false;
   bool isPasswordVisible = false;
-  final FocusNode emailFocusNode = FocusNode(); // Focus node for the email field
 
   @override
   void dispose() {
-    emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
-    emailFocusNode.dispose();
     super.dispose();
-  }
-
-  // Function to toggle keyboard type
-  void toggleKeyboardType() {
-    setState(() {
-      isNumericKeyboard = !isNumericKeyboard;
-    });
-
-    // Unfocus the current field to refresh the keyboard
-    FocusScope.of(context).unfocus();
-
-    // Refocus after a short delay
-    Future.delayed(const Duration(milliseconds: 100), () {
-      FocusScope.of(context).requestFocus(emailFocusNode);
-    });
   }
 
   @override
@@ -57,57 +37,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 40),
                     const Text(
-                      'Register',
+                      'New Password',
                       style: TextStyle(color: Colors.blue, fontSize: 28, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 40),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.blue, width: 2),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: emailController,
-                              focusNode: emailFocusNode, // Attach focus node
-                              keyboardType: isNumericKeyboard ? TextInputType.number : TextInputType.emailAddress,
-                              decoration: InputDecoration(
-                                labelText: isNumericKeyboard ? 'Number' : 'Email', // Dynamic label
-                                prefixIcon: Icon(
-                                  isNumericKeyboard ? Icons.phone : Icons.email_outlined, // Dynamic icon
-                                  color: Colors.blue,
-                                ),
-                                border: const UnderlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            height: 60,
-                            decoration: const BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                                bottomLeft: Radius.circular(20),
-                                topRight: Radius.circular(6),
-                                bottomRight: Radius.circular(6),
-                              ),
-                            ),
-                            child: IconButton(
-                              onPressed: toggleKeyboardType,
-                              icon: Icon(
-                                isNumericKeyboard ? Icons.keyboard : Icons.dialpad,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
@@ -189,7 +122,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).pushNamed('/otpScreen');
+                          Navigator.of(context).pushNamed('/loginScreen');
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
@@ -199,7 +132,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         child: const Text(
-                          "Verify OTP",
+                          "Reset Password",
                           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 20),
                         ),
                       ),

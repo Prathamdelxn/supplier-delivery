@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 
+import 'screens/supplier/views/auth/forgot_otp_screen.dart';
+import 'screens/supplier/views/auth/forgot_password.dart';
+import 'screens/supplier/views/auth/login_screen.dart';
+import 'screens/supplier/views/auth/new_password.dart';
+import 'screens/supplier/views/auth/otp_screen.dart';
+import 'screens/supplier/views/auth/register_screen.dart';
+import 'screens/supplier/views/home/home_screen.dart';
+import 'screens/supplier/views/profile/personal_info.dart';
+
 void main() {
   runApp(const MainApp());
 }
@@ -9,13 +18,19 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
+    return MaterialApp(
+      initialRoute: '/loginScreen',
+      // initialRoute: '/profileInfoScreen',
+      routes: {
+        '/homeScreen': (context) => HomeScreen(),
+        '/profileInfoScreen': (context) => PersonalInfoScreen(),
+        '/loginScreen': (context) => LoginScreen(),
+        '/registerScreen': (context) => RegisterScreen(),
+        '/otpScreen': (context) => OtpScreen(),
+        '/forgotOtpScreen': (context) => ForgotOtpScreen(),
+        '/forgotPasswordScreen': (context) => ForgotPasswordScreen(),
+        '/newPasswordScreen': (context) => NewPasswordScreen(),
+      },
     );
   }
 }
