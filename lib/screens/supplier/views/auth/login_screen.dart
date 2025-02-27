@@ -1,4 +1,12 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../profile/personal_info.dart';
+import 'config.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,7 +20,57 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   bool isNumericKeyboard = false;
   bool isPasswordVisible = false;
-  final FocusNode emailFocusNode = FocusNode(); // Focus node for the email field
+  final FocusNode emailFocusNode = FocusNode();
+  late SharedPreferences prefs;
+
+  void loginUser() async {
+    if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
+      var reqBody = {
+        'email': emailController.text,
+        'password': passwordController.text
+      };
+
+      var response = await http.post(
+        Uri.parse(login),
+        body: jsonEncode(reqBody),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      );
+
+      log(response.statusCode.toString());
+      if (response.statusCode == 400) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Supplier Email dosn't exists")));
+        return;
+      }
+
+      var jsonResponse = jsonDecode(response.body);
+      log(jsonResponse['status'].toString());
+      if (jsonResponse['status']) {
+        var myToken = jsonResponse['token'];
+        await prefs.setString('token', myToken);
+
+        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {
+          return PersonalInfoScreen(
+            token: myToken,
+          );
+        }), (route) => false);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid Credentials')));
+      }
+    }
+  }
+
+  Future<void> _initializePrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePrefs();
+  }
 
   @override
   void dispose() {
@@ -22,16 +80,13 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // Function to toggle keyboard type
   void toggleKeyboardType() {
     setState(() {
       isNumericKeyboard = !isNumericKeyboard;
     });
 
-    // Unfocus the current field to refresh the keyboard
     FocusScope.of(context).unfocus();
 
-    // Refocus after a short delay
     Future.delayed(const Duration(milliseconds: 100), () {
       FocusScope.of(context).requestFocus(emailFocusNode);
     });
@@ -174,7 +229,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).pushNamed("/profileInfoScreen");
+                          loginUser();
+                          // Navigator.of(context).pushNamed('/navigationScreen');
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,

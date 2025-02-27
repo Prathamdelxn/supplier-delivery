@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'config.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -13,7 +18,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController confirmPasswordController = TextEditingController();
   bool isNumericKeyboard = false;
   bool isPasswordVisible = false;
-  final FocusNode emailFocusNode = FocusNode(); // Focus node for the email field
+  final FocusNode emailFocusNode = FocusNode();
+
+  void registerSupplier() async {
+    if (emailController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Email is required')));
+      return;
+    }
+    if (passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password is required')));
+      return;
+    }
+    if (confirmPasswordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Confirm Password is required')));
+      return;
+    }
+    if (passwordController.text != confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password and Confirm Password should be same')));
+      return;
+    }
+
+    if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty && confirmPasswordController.text.isNotEmpty) {
+      var reqBody = {
+        'email': emailController.text,
+        'password': passwordController.text
+      };
+
+      var response = await http.post(
+        Uri.parse(registration),
+        body: jsonEncode(reqBody),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      );
+
+      log(response.body);
+
+      if (response.statusCode == 400) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Supplier Email already exists')));
+        return;
+      }
+
+      log("${response.statusCode}");
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Supplier Registered Successfully')));
+        Navigator.of(context).pushNamedAndRemoveUntil('/loginScreen', (route) => false);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -24,19 +76,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  // Function to toggle keyboard type
   void toggleKeyboardType() {
     setState(() {
       isNumericKeyboard = !isNumericKeyboard;
     });
 
-    // Unfocus the current field to refresh the keyboard
     FocusScope.of(context).unfocus();
 
-    // Refocus after a short delay
     Future.delayed(const Duration(milliseconds: 100), () {
       FocusScope.of(context).requestFocus(emailFocusNode);
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
@@ -189,7 +243,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).pushNamed('/otpScreen');
+                          // Navigator.of(context).pushNamed('/otpScreen');
+                          registerSupplier();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
@@ -199,7 +254,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         child: const Text(
-                          "Verify OTP",
+                          "Verify OTP/Submit",
                           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 20),
                         ),
                       ),

@@ -2,11 +2,13 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 import 'MapScreen.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
-  const PersonalInfoScreen({super.key});
+  final token;
+  const PersonalInfoScreen({super.key, required this.token});
 
   @override
   State<PersonalInfoScreen> createState() => _PersonalInfoScreenState();
@@ -21,7 +23,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   final TextEditingController _shopNameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
 
-  // Function to pick an image from gallery
   Future<void> pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -47,6 +48,14 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         );
       },
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    log("Token: ${widget.token}");
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(widget.token);
+    log("Decoded Token: $decodedToken");
   }
 
   @override
@@ -153,7 +162,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     log("Shop Name: ${_shopNameController.text}");
                     log("Address: ${_addressController.text}");
 
-                    Navigator.pushNamed(context, "/homeScreen");
+                    Navigator.pushNamed(context, "/navigationScreen");
                     _fullNameController.clear();
                     _whatsappNumberController.clear();
                     _businessTypeController.clear();
