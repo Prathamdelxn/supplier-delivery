@@ -25,8 +25,10 @@ class _NavigationpageState extends State<NavigationPage> {
     // CategoriesPage(),
     OrdersPage(),
     ProductPage(),
-    SalesReportScreen(),
-    ProfileScreen()
+   // SalesReportScreen(),
+   SalesAnalyticsScreen(),
+    // ProfileScreen()
+    SalesProfileScreen()
   ];
 
   @override

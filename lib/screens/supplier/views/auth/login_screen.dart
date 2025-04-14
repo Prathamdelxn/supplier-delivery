@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:supplier_dashboard/NavigationPages.dart';
+import 'package:supplier_dashboard/screens/supplier/api/auth_api.dart';
+import 'package:supplier_dashboard/screens/supplier/providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,7 +16,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   bool isNumericKeyboard = false;
   bool isPasswordVisible = false;
-  final FocusNode emailFocusNode = FocusNode(); // Focus node for the email field
+  bool isLoading = false;
+  final FocusNode emailFocusNode =
+      FocusNode(); // Focus node for the email field
 
   @override
   void dispose() {
@@ -20,6 +26,37 @@ class _LoginScreenState extends State<LoginScreen> {
     passwordController.dispose();
     emailFocusNode.dispose();
     super.dispose();
+  }
+
+  void loginSupplier() async {
+    setState(() {
+      isLoading = true;
+    });
+    final response =
+        await AuthApi.login(emailController.text, passwordController.text);
+    print(response);
+    setState(() {
+      isLoading = false;
+    });
+    if (response["success"] == true) {
+      String userId = response["supplier"]["_id"];
+      String userEmail = response["supplier"]["supplierEmail"];
+      String token = response["token"];
+      Provider.of<AuthProvider>(context, listen: false)
+          .login(userId, userEmail, token);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text("Registration Successful!"),
+            backgroundColor: Colors.green),
+      );
+      Navigator.pushAndRemoveUntil(context,
+          MaterialPageRoute(builder: (context) => NavigationPage()), (Route<dynamic> route) => false);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(response["message"]), backgroundColor: Colors.red),
+      );
+    }
   }
 
   // Function to toggle keyboard type
@@ -50,13 +87,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const SizedBox(height: 70),
                     Image.asset(
-                      "assets/images/logo.png",
+                      "assets/images/fflogo.png",
                       width: 230,
                     ),
                     const SizedBox(height: 40),
                     const Text(
                       'Login',
-                      style: TextStyle(color: Colors.blue, fontSize: 28, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 40),
                     Container(
@@ -70,11 +110,17 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: TextField(
                               controller: emailController,
                               focusNode: emailFocusNode, // Attach focus node
-                              keyboardType: isNumericKeyboard ? TextInputType.number : TextInputType.emailAddress,
+                              keyboardType: isNumericKeyboard
+                                  ? TextInputType.number
+                                  : TextInputType.emailAddress,
                               decoration: InputDecoration(
-                                labelText: isNumericKeyboard ? 'Number' : 'Email', // Dynamic label
+                                labelText: isNumericKeyboard
+                                    ? 'Number'
+                                    : 'Email', // Dynamic label
                                 prefixIcon: Icon(
-                                  isNumericKeyboard ? Icons.phone : Icons.email_outlined, // Dynamic icon
+                                  isNumericKeyboard
+                                      ? Icons.phone
+                                      : Icons.email_outlined, // Dynamic icon
                                   color: Colors.blue,
                                 ),
                                 border: const UnderlineInputBorder(
@@ -97,7 +143,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: IconButton(
                               onPressed: toggleKeyboardType,
                               icon: Icon(
-                                isNumericKeyboard ? Icons.keyboard : Icons.dialpad,
+                                isNumericKeyboard
+                                    ? Icons.keyboard
+                                    : Icons.dialpad,
                                 color: Colors.white,
                               ),
                             ),
@@ -123,7 +171,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                              isPasswordVisible
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                               color: Colors.blue,
                             ),
                             onPressed: () {
@@ -144,7 +194,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         Spacer(),
                         GestureDetector(
                           onTap: () {
-                            Navigator.of(context).pushNamed('/forgotPasswordScreen');
+                            Navigator.of(context)
+                                .pushNamed('/forgotPasswordScreen');
                           },
                           child: Text(
                             "Forgot Password?",
@@ -174,7 +225,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).pushNamed("/profileInfoScreen");
+                          loginSupplier();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
@@ -185,7 +236,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         child: const Text(
                           "Sign In",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 20),
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 20),
                         ),
                       ),
                     ),
@@ -198,7 +252,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           WidgetSpan(
                             child: GestureDetector(
                               onTap: () {
-                                Navigator.of(context).pushNamed('/registerScreen');
+                                Navigator.of(context)
+                                    .pushNamed('/registerScreen');
                               },
                               child: Text(
                                 'Sign Up',

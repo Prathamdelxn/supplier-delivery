@@ -1,231 +1,485 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:math';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:supplier_dashboard/screens/supplier/views/profile/bankDetails.dart';
+import 'package:supplier_dashboard/screens/supplier/views/profile/edit_profile.dart';
+import 'package:supplier_dashboard/screens/supplier/views/profile/edit_store_details.dart';
+
+import '../../providers/auth_provider.dart';
+
+class SalesProfileScreen extends StatefulWidget {
+  const SalesProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<SalesProfileScreen> createState() => _SalesProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _SalesProfileScreenState extends State<SalesProfileScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController controller;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool isDarkMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() async {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await authProvider.loadUserData(); // Load stored credentials
+      await authProvider.fetchSupplierData(); // Fetch supplier details
+    });
+
+    controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  void _toggleDrawer() {
+    if (_scaffoldKey.currentState == null) return;
+
+    if (_scaffoldKey.currentState!.isDrawerOpen) {
+      _scaffoldKey.currentState!.closeDrawer();
+    } else {
+      _scaffoldKey.currentState!.openDrawer();
+    }
+  }
+
+  String _capitalize(String? text) {
+    if (text == null || text.isEmpty) return "Loading...";
+    return text[0].toUpperCase() + text.substring(1);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final screenWidth = MediaQuery.of(context).size.width;
+    // dynamic data = authProvider.supplierData;
+    // dynamic dd = data.containsKey('bankDetails') ? data['bankDetails'] : null;
+dynamic data = authProvider.supplierData ?? {};
+  dynamic dd = data is Map && data.containsKey('bankDetails') 
+      ? data['bankDetails'] 
+      : null;
+     print(dd);
+    //  print(dd["bankDetails"]["accountHolderName"]);
+
+    // if (dd == null) {
+    //   print("Data is null");
+    // } else {
+    //   print("Data exists");
+    // }
+
     return Scaffold(
-      body: SingleChildScrollView(
+      key: _scaffoldKey,
+      drawer: Container(
+        width: screenWidth * 0.85,
+        child: Drawer(
+          backgroundColor: const Color.fromARGB(255, 236, 235, 234),
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 60, horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Image.asset(
+                      "assets/images/fflogo.png",
+                      height: 50,
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    Text(
+                      "Supplier's",
+                      style: TextStyle(
+                          fontSize: 22,
+                          color: const Color.fromARGB(255, 12, 76, 28),
+                          fontWeight: FontWeight.w600),
+                    )
+                  ],
+                ),
+                SizedBox(
+                  height: 40,
+                ),
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    "Menu",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: const Color.fromARGB(255, 75, 75, 75),
+                        fontSize: 18),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => EditProfile()));
+                  },
+                  child: Container(
+                      height: 60,
+                      width: double.infinity,
+                      margin: EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 208, 208, 207),
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                          ),
+                          Icon(
+                            Icons.person,
+                            size: 30,
+                            color: const Color.fromARGB(255, 44, 43, 43),
+                          ),
+                          SizedBox(
+                            width: 12,
+                          ),
+                          Text(
+                            "Edit Profile",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18,
+                                color: const Color.fromARGB(255, 56, 56, 56)),
+                          )
+                        ],
+                      )),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => EditStoreDetails()));
+                  },
+                  child: Container(
+                      height: 60,
+                      width: double.infinity,
+                      margin: EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 208, 208, 207),
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                          ),
+                          Icon(
+                            Icons.store,
+                            size: 30,
+                            color: const Color.fromARGB(255, 44, 43, 43),
+                          ),
+                          SizedBox(
+                            width: 12,
+                          ),
+                          Text(
+                            "Store Profile",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18,
+                                color: const Color.fromARGB(255, 56, 56, 56)),
+                          )
+                        ],
+                      )),
+                ),
+                Container(
+                    height: 60,
+                    width: double.infinity,
+                    margin: EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 208, 208, 207),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Icon(
+                          Icons.notifications,
+                          size: 30,
+                          color: const Color.fromARGB(255, 44, 43, 43),
+                        ),
+                        SizedBox(
+                          width: 12,
+                        ),
+                        Text(
+                          "Notification",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
+                              color: const Color.fromARGB(255, 56, 56, 56)),
+                        )
+                      ],
+                    )),
+                Container(
+                    height: 60,
+                    width: double.infinity,
+                    margin: EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 208, 208, 207),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Icon(
+                          Icons.support_agent_outlined,
+                          size: 30,
+                          color: const Color.fromARGB(255, 44, 43, 43),
+                        ),
+                        SizedBox(
+                          width: 12,
+                        ),
+                        Text(
+                          "Help and Support",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
+                              color: const Color.fromARGB(255, 56, 56, 56)),
+                        )
+                      ],
+                    )),
+                Spacer(),
+                Divider(),
+                SizedBox(
+                  height: 20,
+                ),
+                Container(
+                    height: 60,
+                    width: double.infinity,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Text(
+                          "Dark Mode",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
+                              color: const Color.fromARGB(255, 56, 56, 56)),
+                        ),
+                        Spacer(),
+                        Switch(
+                            value: isDarkMode,
+                            activeColor: Colors.green,
+                            onChanged: (bool value) {
+                              setState(() {
+                                isDarkMode = value;
+                              });
+                            }),
+                        SizedBox(
+                          width: 20,
+                        ),
+                      ],
+                    )),
+                SizedBox(
+                  height: 15,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    authProvider.logout(context);
+                  },
+                  child: Container(
+                      height: 60,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: const Color.fromARGB(255, 37, 82, 6),
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 30,
+                          ),
+                          Icon(
+                            Icons.logout,
+                            size: 30,
+                            color: const Color.fromARGB(255, 251, 250, 250),
+                          ),
+                          SizedBox(
+                            width: 40,
+                          ),
+                          Text(
+                            "Logout",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 20,
+                                color:
+                                    const Color.fromARGB(255, 255, 251, 251)),
+                          )
+                        ],
+                      )),
+                ),
+                SizedBox(
+                  height: 40,
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+      onDrawerChanged: (isOpened) {
+        if (isOpened) {
+          controller.forward();
+        } else {
+          controller.reverse();
+        }
+      },
+      backgroundColor: Color.fromARGB(255, 228, 240, 239),
+      body: SafeArea(
         child: Stack(
           children: [
             Column(
               children: [
-                // Green Background Section
+                // Top Blue Header
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.42,
-                  width: double.infinity,
-                  color: const Color.fromARGB(255, 8, 159, 89),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 60),
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage: NetworkImage(
-                            "https://img.etimg.com/thumb/width-1200,height-900,imgsize-2430285,resizemode-75,msid-99091239/industry/services/retail/mom-and-pop-store-day-why-kirana-will-survive-the-corporate-blitz.jpg"),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        "Green Valley Farms",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      const Text(
-                        "Organic Produce Supplier",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.location_city, color: Colors.white),
-                          SizedBox(width: 5),
-                          Text(
-                            "Katraj, Pune",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
-                                color: Colors.white),
-                          ),
-                          SizedBox(width: 20),
-                          Icon(Icons.phone, color: Colors.white),
-                          SizedBox(width: 5),
-                          Text(
-                            "+91 9812763405",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
-                                color: Colors.white),
-                          )
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        "⭐ ⭐ ⭐ ⭐ ⭐ (245 reviews)",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 20,
-                            color: Colors.white),
-                      ),
-                    ],
-                  ),
+                  height: 175,
+                  color: const Color.fromARGB(255, 33, 82, 243),
                 ),
-                Container(
-                
-                  padding: EdgeInsets.all(15),
-                  width: double.infinity,
-                  child: Column(
+                // Expanded Section with Scrollable Content
+                Expanded(
+                  child: ListView(
+                    padding: EdgeInsets.only(
+                        top: 80, left: 16, right: 16, bottom: 16),
                     children: [
-                      SizedBox(
-                        height: 70,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Top Selling Products",
-                            style: TextStyle(
-                                fontSize: 22, fontWeight: FontWeight.w600),
-                          ),
-                          Text(
-                            "View All",
-                            style: TextStyle(
-                                color: Colors.green,
-                                fontWeight: FontWeight.w500),
-                          ),
-                        ],
-                      ),
-                   
-                      SizedBox(
-                        height: 20,
-                      ),  
-                      Container(
-                        height: 250,
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: 3, itemBuilder: (BuildContext context,int index){
-                          return Container(
-         
-                                width: 185,
-                                margin: EdgeInsets.only(right: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue,
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                child: Column(
-                                  
-                                  children: [
-                                  ClipRRect(  borderRadius: BorderRadius.only(topLeft: Radius.circular(15),topRight: Radius.circular(15)), child: Image.network("https://cdn.britannica.com/16/187216-131-FB186228/tomatoes-tomato-plant-Fruit-vegetable.jpg",width: double.infinity,)),
-                                  SizedBox(height: 10,),
-                                  Text("Tomato's",style: TextStyle(color: Colors.white,fontSize: 22,fontWeight: FontWeight.bold),),
-                                  Text("₹ 25 / kg",style: TextStyle(color: Colors.white,fontSize: 16,fontWeight: FontWeight.w500),),
-                                  SizedBox(height: 5,),
-
-                                  Text("230 sold",style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.w500),),
-                                  ],
-                                ),
-                              );
-                        }),
-                      ),
-                      SizedBox(height: 10,),
-                        Row(
+                      // bankdetails==null? Container(
+                      //   child: Text('data'),
+                      // ):
+                      _buildSection(context,
+                          icon: Icons.business,
+                          title: 'Business Details',
                           children: [
-                            Text("Recent Orders",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w600),),
-                          ],
-                        ),
-                        SizedBox(
-                          child: ListView.builder(
-                            padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: 3,
-                          physics: NeverScrollableScrollPhysics(  ),
+                            _buildDetailRow('Business Type',
+                                '${authProvider.supplierData?["supplierBusiness_type"] ?? " Loading Business.."}'),
+                            _buildDetailRow('Shop Name',
+                                '${authProvider.supplierData?["supplierShop_name"] ?? " Loading Name.."} '),
+                            _buildDetailRow('GST Number', '29ABCDE1234F1Z5'),
+                            _buildDetailRow('PAN', 'ABCDE1234F'),
+                          ]),
+                      SizedBox(height: 12),
+                      _buildSection(context,
+                          icon: Icons.phone,
+                          title: 'Contact Details',
+                          children: [
+                            _buildDetailRow('Email',
+                                ' ${authProvider.supplierData?['supplierEmail'] ?? "  contact@techsupplies.com"}',
+                                icon: Icons.email),
+                            _buildDetailRow('Phone',
+                                ' ${authProvider.supplierData?['supplierPhone'] ?? "  Mobile number ..."}',
+                                icon: Icons.phone),
+                          ]),
+                      SizedBox(height: 12),
+                      _buildSection(context,
+                          icon: Icons.location_on,
+                          title: 'Address',
+                          children: [
+                           _buildDetailRow(
+  "",
+  '${_capitalize(authProvider.supplierData?['address']?['street'] ?? "NA")}, '
+  '${_capitalize(authProvider.supplierData?['address']?['city'] ?? "NA")}, '
+  '${_capitalize(authProvider.supplierData?['address']?['state'] ?? "NA")}, '
+  '${_capitalize(authProvider.supplierData?['address']?['country'] ?? "NA")}, '
+  '${authProvider.supplierData?['address']?['pincode'] ?? "Loading Address..."}',
+),
 
-                            itemBuilder: (BuildContext context , int index){
-                              return Container(
-                               
-                                padding: EdgeInsets.all(10),
-                                margin: EdgeInsets.only(top: 10), 
+                          ]),
+                      SizedBox(height: 12),
+                      dd == null
+                          ? GestureDetector(
+                            onTap:() {
+                              showBankingForm(context);
+                            },
+                            child: Container(
                                 width: double.infinity,
+                                margin: EdgeInsets.symmetric(horizontal: 5),
+                                height: 70,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: const Color.fromARGB(255, 218, 217, 216),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Row(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Color.fromRGBO(9, 30, 66, 0.25),
+                                        blurRadius: 8,
+                                        spreadRadius: -2,
+                                        offset: Offset(
+                                          0,
+                                          4,
+                                        ),
+                                      ),
+                                      BoxShadow(
+                                        color: Color.fromRGBO(9, 30, 66, 0.08),
+                                        blurRadius: 0,
+                                        spreadRadius: 1,
+                                        offset: Offset(
+                                          0,
+                                          0,
+                                        ),
+                                      ),
+                                    ]),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Text("#ORD-1234",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500),),
-                                        Spacer(),
-                                        Text("₹ 250",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500),),
+                                        Icon(Icons.add_circle_outline),
+                                        SizedBox(width: 10,),
+                                        Text("Add Bank Account Details",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16),)
                                       ],
                                     ),
-                                    SizedBox(height: 7,),
-                                    Row(
-                                      children: [
-                                        Text("Prathmesh",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
-                                        Spacer(),
-                                        Container(height: 30,width: 90,
-                                        decoration: BoxDecoration(
-                                          color: Colors.green,
-                                          borderRadius: BorderRadius.circular(15)
-                                        ),
-                                        child: Center(
-                                          child: Text("Delivered",style: TextStyle(color: Colors.white,fontSize: 16,fontWeight: FontWeight.w500),),
-                                        ),
-                                     )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              );
-
-                          }
-                        ))
+                              ),
+                          )
+                          : _buildSection(context,
+                              icon: Icons.account_balance,
+                              title: 'Bank Details',
+                              children: [
+                                   _buildDetailRow(
+                                      'Account Holder', '${dd["accountHolderName"]?? "NA"}'),
+                                   _buildDetailRow(
+                                      'Bank Name', '${dd["bankName"]?? "NA"}'),
+                                   _buildDetailRow(
+                                       'Account Number', '${dd["accountNumber"]?? "NA"}'),
+                                   _buildDetailRow('IFSC Code', '${dd["ifscCode"]?? "NA"}'),
+                                ]),
+                      SizedBox(height: 12),
+                      _buildSection(context,
+                          icon: Icons.verified,
+                          title: "Verification Status",
+                          children: [
+                            _buildVerificationStatus(),
+                          ]),
+                      SizedBox(
+                        height: 50,
+                      )
                     ],
                   ),
-                ),
-                // White Background Section
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.65,
-                  width: double.infinity,
-                  color: Colors.white,
                 ),
               ],
             ),
-            // Scrolling Cards Section positioned at the intersection
+            // Overlapping Card
             Positioned(
-              top: MediaQuery.of(context).size.height * 0.35 -
-                  10, // Center the cards at the intersection
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 150,
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(children: [
-                    _buildCard(
-                        "assets/images/write.png", "100", "Total Orders"),
-                    SizedBox(width: 10),
-                    _buildCard(
-                        "assets/images/wallet.png", "₹ 1899", "Earnings"),
-                    SizedBox(width: 10),
-                    _buildCard(
-                        "assets/images/category.png", "45", "Dashboard"),
-                  ]),
-                ),
-              ),
+              top: 120,
+              left: 10,
+              right: 10,
+              child: _buildCard(context),
+            ),
+            // Header (Company Name + Icon)
+            Positioned(
+              top: 35,
+              left: 20,
+              right: 20,
+              child: _buildHeader(),
             ),
           ],
         ),
@@ -233,44 +487,211 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildCard(String image, String amount, String title) {
+  Widget _buildStatsColumn(IconData icon, String value, String label) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 30, color: Color.fromARGB(255, 33, 82, 243)),
+        SizedBox(height: 4),
+        Text(value,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(label,
+            style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: const Color.fromARGB(255, 114, 113, 113))),
+      ],
+    );
+  }
+
+  Widget _buildHeader() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            CircleAvatar(
+              radius: 30,
+              backgroundColor: Colors.white,
+              child: Icon(Icons.store,
+                  color: Color.fromARGB(255, 33, 82, 243), size: 30),
+            ),
+            SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${authProvider.supplierData?['supplierName'] != null ? authProvider.supplierData!['supplierName'][0].toUpperCase() + authProvider.supplierData!['supplierName'].substring(1) : "Loading Name.."}',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(
+                      '${authProvider.supplierData?["supplierBusiness_type"] != null ? authProvider.supplierData!["supplierBusiness_type"][0].toUpperCase() + authProvider.supplierData!["supplierBusiness_type"].substring(1) : "Loading Business.."}',
+                      style: TextStyle(fontSize: 14, color: Colors.white),
+                    ),
+                    SizedBox(width: 8),
+                    _buildStatusBadge(true),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        GestureDetector(
+          onTap: () {
+            _toggleDrawer();
+          },
+          child: Container(
+            padding: EdgeInsets.all(8),
+            child: AnimatedIcon(
+              icon: AnimatedIcons.menu_close,
+              progress: controller,
+              color: Colors.white,
+              size: 32.0,
+              semanticLabel: 'Show menu',
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusBadge(bool isVerified) {
     return Container(
-      height: 120,
-      width: 150,
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
+        color: isVerified ? Colors.green : Colors.orange,
         borderRadius: BorderRadius.circular(20),
-        color: Colors.white,
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(149, 157, 165, 0.2),
-            blurRadius: 24,
-            spreadRadius: 0,
-            offset: Offset(0, 8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isVerified ? Icons.verified : Icons.info,
+            color: Colors.white,
+            size: 16,
+          ),
+          SizedBox(width: 4),
+          Text(
+            isVerified ? 'Verified' : 'Pending',
+            style: TextStyle(
+                color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
           ),
         ],
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    );
+  }
+
+  Widget _buildCard(BuildContext context) {
+    return Card(
+      color: Colors.white,
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildStatsColumn(Icons.shopping_bag, '1,234', 'Orders'),
+            Container(height: 50, width: 1, color: Colors.grey[300]),
+            _buildStatsColumn(
+                FontAwesomeIcons.chartLine, '\$50,000', 'Revenue'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSection(BuildContext context,
+      {required IconData icon,
+      required String title,
+      required List<Widget> children}) {
+    return Card(
+      color: Colors.white,
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 20, color: Colors.blueAccent),
+                SizedBox(width: 8),
+                Text(title,
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            SizedBox(height: 10),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String title, String value, {IconData? icon}) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(
-            image,
-            height: 24,
-          ),
-          SizedBox(height: 10),
-          Text(
-            "${amount}",
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-          ),
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 16,
+          if (icon != null) ...[
+            Icon(icon, size: 20, color: Colors.blueAccent),
+            SizedBox(width: 12),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (title.isNotEmpty) ...[
+                  Text(
+                    title.isNotEmpty
+                        ? title[0].toUpperCase() + title.substring(1)
+                        : "",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                  SizedBox(height: 4),
+                ],
+                Text(
+                  value.isNotEmpty
+                      ? value[0].toUpperCase() + value.substring(1)
+                      : "",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildVerificationStatus() {
+    return Card(
+      color: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Row( 
+          children: [
+            Icon(Icons.verified, color: Colors.green),
+            SizedBox(width: 10),
+            Text("Verified Supplier",
+                style: TextStyle(
+                    color: Colors.green, fontWeight: FontWeight.bold)),
+          ],
+        ),
       ),
     );
   }
