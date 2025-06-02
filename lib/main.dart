@@ -39,6 +39,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supplier_dashboard/screens/supplier/providers/auth_provider.dart';
@@ -54,7 +55,8 @@ import 'screens/supplier/views/auth/register_screen.dart';
 import 'screens/supplier/views/home/home_screen.dart';
 import 'screens/supplier/views/profile/personal_info.dart';
 
-void main() {
+Future<void> main() async {
+   await dotenv.load(fileName: ".env");
   runApp(
     MultiProvider(
       providers: [
